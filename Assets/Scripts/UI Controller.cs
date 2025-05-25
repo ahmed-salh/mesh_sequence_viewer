@@ -10,64 +10,65 @@ public class UIController : MonoBehaviour
 
     public Button nextBtn, prevBtn;
 
-    public MeshLoader loader;
-
     public Toggle xRay;
 
-    public Text frameText;
+    public Text frameLabel;
 
-    void Start()
+    [SerializeField]
+    private Viewer viewer;
+
+    [SerializeField]
+    private Loader loader;
+
+
+    private void InitializeSlider(int maxValue) 
     {
-        slider.maxValue = loader.frames.Length - 1;
+        slider.maxValue = maxValue;
 
         slider.wholeNumbers = true;
-
-        slider.onValueChanged.AddListener(val => loader.SetFrame((int)val));
-
-        nextBtn.onClick.AddListener(() => loader.SetFrame(loader.CurrentFrame + 1));
-
-        prevBtn.onClick.AddListener(() => loader.SetFrame(loader.CurrentFrame - 1));
-
-
     }
-
-    
 
     void OnToggleChanged(bool isOn)
     {
-        if (isOn)
-            loader.SetTransparent();
-        else
-            loader.SetOpaque();
+        // TODO: update the shader to allow transparent PCS
     }
 
 
     private void OnEnable()
     {
-        loader.OnFrameChanged += UpdateSlider;
+        viewer.OnFrameChanged += UpdateSlider;
+
+        viewer.OnFrameChanged += UpdateFrameText;
 
         loader.OnFrameLoaded += UpdateSliderMaxLength;
 
-        loader.OnFrameChanged += UpdateFrameText;
+        loader.OnFrameLoaded += InitializeSlider;
 
         xRay.onValueChanged.AddListener(OnToggleChanged);
 
+        slider.onValueChanged.AddListener(val => viewer.SetFrame((int)val));
+
+        nextBtn.onClick.AddListener(() => viewer.SetFrame(viewer.CurrentFrame + 1));
+
+        prevBtn.onClick.AddListener(() => viewer.SetFrame(viewer.CurrentFrame - 1));
 
     }
 
     private void OnDisable()
     {
-        loader.OnFrameChanged -= UpdateSlider;
+        viewer.OnFrameChanged -= UpdateSlider;
+
+        viewer.OnFrameChanged -= UpdateFrameText;
 
         loader.OnFrameLoaded -= UpdateSliderMaxLength;
 
-        loader.OnFrameChanged -= UpdateFrameText;
+        loader.OnFrameLoaded -= InitializeSlider;
     }
 
     void UpdateSlider(int index)
     {
         if ((int)slider.value != index)
-            slider.SetValueWithoutNotify(index); // avoid re-trigger
+            slider.SetValueWithoutNotify(index);
     }
 
     void UpdateSliderMaxLength(int length) 
@@ -77,7 +78,7 @@ public class UIController : MonoBehaviour
 
     void UpdateFrameText(int index) 
     {
-        frameText.text = $"Frame: {index}";
+        frameLabel.text = $"Frame: {index}";
     }
 }
 
