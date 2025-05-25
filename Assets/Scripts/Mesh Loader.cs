@@ -11,6 +11,8 @@ public class MeshLoader : MonoBehaviour
 
     public Material defaultMaterial;
 
+    public bool autoAjustScale = true;
+
     public int CurrentFrame { get; private set; }
 
     public event Action<int> OnFrameChanged;
@@ -64,12 +66,13 @@ public class MeshLoader : MonoBehaviour
     {
         meshFilter.mesh = frames[frameIndex];
 
-        CenterAndScaleMesh(frames[frameIndex], transform);
+        if(autoAjustScale)
+            Scale(frames[frameIndex], transform);
 
 
     }
 
-    void CenterAndScaleMesh(Mesh mesh, Transform target)
+    void Scale(Mesh mesh, Transform target)
     {
         var size = mesh.bounds.size;
         
